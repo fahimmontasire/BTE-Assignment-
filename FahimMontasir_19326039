@@ -1,0 +1,47 @@
+def read_fasta(file_path):
+    with open(file_path, 'r') as fasta_file:
+        lines = fasta_file.readlines()
+        sequence = ''.join(line.strip() for line in lines[1:])
+        return sequence
+
+def find_gene(sequence, promoter_sequence):
+    promoter_index = sequence.find(promoter_sequence)
+    if promoter_index == -1:
+        return False
+
+    start_codon = 'ATG'
+    max_distance = 30
+    gene_start = -1
+
+    for i in range(promoter_index, min(promoter_index + max_distance, len(sequence) - 2)):
+        if sequence[i:i+3] == start_codon:
+            gene_start = i
+            break
+
+    if gene_start == -1:
+        return False
+
+    stop_codons = ['TAA', 'TAG', 'TGA']
+    gene_end = -1
+
+    for i in range(gene_start, len(sequence) - 2, 3):
+        codon = sequence[i:i+3]
+        if codon in stop_codons:
+            gene_end = i + 3
+            break
+
+    if gene_end - gene_start >= 150:
+        return True
+
+    return False
+
+fasta_file_path = 'path_to_the_FASTA_file.fasta'
+dna_sequence = read_fasta(fasta_file_path)
+
+promoter_sequence = input("Enter the promoter sequence: ")
+found_gene = find_gene(dna_sequence, promoter_sequence)
+
+if found_gene:
+    print("Gene found")
+else:
+    print("Gene not found")
